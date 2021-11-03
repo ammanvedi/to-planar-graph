@@ -1,1 +1,9 @@
-export { f } from './to-planar-graph';
+export {
+    toPlanarGraph,
+    AugmentationResult,
+    InputNodes,
+    InputNode,
+    InputEdge,
+    InputEdges,
+    Position,
+} from './to-planar-graph';
