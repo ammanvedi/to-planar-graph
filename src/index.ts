@@ -1,1 +1,1 @@
-export { f } from './lib';
+export { f } from './to-planar-graph';
