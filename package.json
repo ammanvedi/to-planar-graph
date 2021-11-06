@@ -9,7 +9,7 @@
     "intersection"
   ],
   "license": "MIT",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Given a graph with a graph with a non planar embedding, make changes to this graph so that it becomes planar.",
   "scripts": {
     "test": "./node_modules/.bin/jest",
