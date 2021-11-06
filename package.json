@@ -10,7 +10,7 @@
   ],
   "license": "MIT",
   "version": "3.0.0",
-  "description": "Description",
+  "description": "Given a graph with a graph with a non planar embedding, make changes to this graph so that it becomes planar.",
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "build": "./node_modules/.bin/tsc"
