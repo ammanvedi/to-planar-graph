@@ -2,6 +2,9 @@ import { InputSegment, OutputIntersection, OutputSegment, sweep } from 'isect';
 
 const APPROX_ZERO = 1e-9;
 
+/**
+ * a 2d [x, y] coordinate position
+ */
 export type Position = [number, number];
 
 /**
@@ -188,6 +191,8 @@ const getCorrectComponentOfSplitEdge = (
     nodes: InputNodes,
     position: Position,
 ): Split | null => {
+    let closest: Split | null = null;
+
     for (let i = 0; i < edgeSplits.length; i++) {
         const edge = edgeMap.get(edgeSplits[i]);
 
@@ -202,16 +207,22 @@ const getCorrectComponentOfSplitEdge = (
             continue;
         }
 
-        if (isOnLineSegment(position, from, to)) {
-            return {
+        const distance = distanceToLineSegment(position, from, to);
+
+        if (
+            closest === null ||
+            (closest.type === SplitType.Split && distance < closest.distance)
+        ) {
+            closest = {
                 type: SplitType.Split,
                 id: getEdgeMapKey(edge),
                 indexInSplitMap: i,
+                distance,
             };
         }
     }
 
-    return null;
+    return closest;
 };
 
 enum SplitType {
@@ -221,7 +232,12 @@ enum SplitType {
 
 type Split =
     | { type: SplitType.ExistingUnsplit; id: EdgeKey }
-    | { type: SplitType.Split; indexInSplitMap: number; id: EdgeKey };
+    | {
+          type: SplitType.Split;
+          indexInSplitMap: number;
+          id: EdgeKey;
+          distance: number;
+      };
 
 const getEdgeToSplit = (
     edgeSplitMap: Map<EdgeKey, Array<EdgeKey>>,
@@ -465,17 +481,26 @@ const removeDuplicateAugmentations = (
 
 export const toPlanarGraph = (
     nodes: InputNodes,
-    edges: InputEdges,
+    _edges: InputEdges,
     vertexMatchThreshold: number,
 ): AugmentationResult => {
+    /**
+     * If we are given an undirected graph, make sure we convert it to a
+     * directed graph
+     */
+    const edges = removeDuplicateEdges(_edges);
     const segments = getInputSegmentsFromEdges(edges, nodes);
     const intersections = sweep<ExtendedSegment>(segments).run();
+    const intersectionsList = buildIntersectionsList(
+        intersections,
+        nodes,
+        vertexMatchThreshold,
+    );
+    const filteredIntersectionList = intersectionsList.filter(
+        (a) => a.edges.length > 0,
+    );
     const graphAugmentations = removeDuplicateAugmentations(
-        buildIntersectionsList(
-            intersections,
-            nodes,
-            vertexMatchThreshold,
-        ).filter((a) => a.edges.length > 0),
+        filteredIntersectionList,
     );
     const { nodes: augmentedNodes, edges: augmentedEdges } = applyAugmentations(
         nodes,

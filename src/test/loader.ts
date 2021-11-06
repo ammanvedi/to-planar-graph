@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as parser from 'fast-xml-parser';
 import { InputEdges, InputNodes } from '../to-planar-graph';
+import { join } from 'path';
 
 type GraphMLResult = {
     graphml: {
@@ -80,9 +81,22 @@ export const loadGraphML = (path: string): GraphMLResult => {
     return result as GraphMLResult;
 };
 
-export const getAlgorithmInputs = (g: GraphMLResult): [InputNodes, InputEdges] => {
+export const getAlgorithmInputs = (
+    g: GraphMLResult,
+): [InputNodes, InputEdges] => {
     return [
         g.graphml.graph.node.map((n) => [n.positionX, n.positionY]),
         (g.graphml.graph.edge || []).map((e) => [e.source, e.target]),
     ];
+};
+
+export const getGMLFilePath = (file: string): string => {
+    return join(__dirname, 'fixtures', file);
+};
+
+export const getInputsFromGraphML = (
+    graphFileName: string,
+): [InputNodes, InputEdges] => {
+    const file = getGMLFilePath(graphFileName);
+    return getAlgorithmInputs(loadGraphML(file));
 };
